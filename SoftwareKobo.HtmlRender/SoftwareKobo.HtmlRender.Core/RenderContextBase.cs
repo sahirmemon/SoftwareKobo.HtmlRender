@@ -70,6 +70,7 @@ namespace SoftwareKobo.HtmlRender.Core
                 throw new ArgumentNullException("richTextBlock");
             }
             richTextBlock.Blocks.Clear();
+            richTextBlock.HorizontalAlignment = Windows.UI.Xaml.HorizontalAlignment.Left;
             RenderNode(Document.Body, new RichTextBlockContainer(richTextBlock));
         }
 

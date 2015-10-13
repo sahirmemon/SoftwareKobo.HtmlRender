@@ -13,6 +13,8 @@ namespace SoftwareKobo.HtmlRender.Core.TextContainer
         public RichTextBlockContainer(RichTextBlock richTextBlock)
         {
             _richTextBlock = richTextBlock;
+            _richTextBlock.TextWrapping = TextWrapping.Wrap;
+            _richTextBlock.HorizontalAlignment = HorizontalAlignment.Left;
         }
 
         public virtual void Add(UIElement control)
@@ -41,6 +43,11 @@ namespace SoftwareKobo.HtmlRender.Core.TextContainer
             {
                 paragraph.Inlines.Add(inline);
             }
+        }
+
+        public virtual RichTextBlock Get()
+        {
+            return _richTextBlock;
         }
     }
 }

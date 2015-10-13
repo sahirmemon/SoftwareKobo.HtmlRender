@@ -4,6 +4,7 @@ using SoftwareKobo.HtmlRender.Core.Interface;
 using SoftwareKobo.HtmlRender.Core.TextContainer;
 using System.Globalization;
 using Windows.UI;
+using Windows.UI.Text;
 using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Media;
 
@@ -21,8 +22,21 @@ namespace SoftwareKobo.HtmlRender.Core.ElementRender
 
         public virtual void RenderElement(IElement element, ITextContainer parent, RenderContextBase context)
         {
-            var span = new Span();
+            var parentContainer = (parent as RichTextBlockContainer).Get();
 
+            Span span = new Span();
+            Underline underline = null;
+
+            var textDecoration = element.Style("text-decoration");
+            if (!string.IsNullOrEmpty(textDecoration))
+            {
+                if (textDecoration == "underline")
+                {
+                    underline = new Underline();
+                    underline.Inlines.Add(span);
+                }
+            }
+            
             var color = element.Style("color");
             if (string.IsNullOrEmpty(color) == false)
             {
@@ -40,14 +54,101 @@ namespace SoftwareKobo.HtmlRender.Core.ElementRender
                         var value = Color.FromArgb(255, r, g, b);
                         if (value != Colors.White && value != Colors.Black)
                         {
-                            span.Foreground = new SolidColorBrush(value);
+                            if (underline != null)
+                            {
+                                underline.Foreground = new SolidColorBrush(value);
+                            }
+                            else
+                            {
+                                span.Foreground = new SolidColorBrush(value);
+                            }
                         }
                     }
                 }
             }
 
-            parent.Add(span);
-            context.RenderNode(element, new SpanContainer(span));
+            var fontSize = element.Style("font-size");
+            if (!string.IsNullOrEmpty(fontSize))
+            {
+                fontSize = fontSize.Replace("px", "");
+                if (underline != null)
+                {
+                    underline.FontSize = double.Parse(fontSize);
+                }
+                else
+                {
+                    span.FontSize = double.Parse(fontSize);
+                }
+            }
+            else
+            {
+                if (underline != null)
+                {
+                    underline.FontSize = 18.0;
+                }
+                else
+                {
+                    span.FontSize = 18.0;
+                }
+            }
+
+            var fontWeight = element.Style("font-weight");
+            if (!string.IsNullOrEmpty(fontWeight))
+            {
+                if (underline != null)
+                {
+                    underline.FontWeight = FontWeights.Bold;
+                }
+                else
+                {
+                    span.FontWeight = FontWeights.Bold;
+                }
+            }
+            
+
+            var textAlign = element.Style("text-align");
+            if (!string.IsNullOrEmpty(textAlign))
+            { 
+                if (textAlign == "left")
+                {
+                    parentContainer.TextAlignment = Windows.UI.Xaml.TextAlignment.Left;
+                }
+                else if (textAlign == "right")
+                {
+                    parentContainer.TextAlignment = Windows.UI.Xaml.TextAlignment.Right;
+                }
+                else
+                {
+                    parentContainer.TextAlignment = Windows.UI.Xaml.TextAlignment.Center;
+                }
+            }
+
+            var textStyle = element.Style("text-style");
+            if (!string.IsNullOrEmpty(textStyle))
+            {
+                if (textStyle == "italic")
+                {
+                    if (underline != null)
+                    {
+                        underline.FontStyle = FontStyle.Italic;
+                    }
+                    else
+                    {
+                        span.FontStyle = FontStyle.Italic;
+                    }
+                }
+            }
+
+            if (underline != null)
+            {
+                parent.Add(underline);
+                context.RenderNode(element, new SpanContainer(underline));
+            }
+            else
+            {
+                parent.Add(span);
+                context.RenderNode(element, new SpanContainer(span));
+            }
         }
     }
 }
